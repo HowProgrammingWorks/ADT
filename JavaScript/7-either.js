@@ -1,5 +1,13 @@
 'use strict';
 
+//була зроблена функція для обчислення податку з доходу
+
+//для зчитування введення з клавіатури
+const readline = require('node:readline');
+
+//податок (24%)
+const taxRate = 0.24;
+
 class Either {
   #left = null;
   #right = null;
@@ -46,6 +54,7 @@ class Either {
 
 // Usage
 
+/*
 const success = Either.right(42);
 const failure = Either.left(500);
 
@@ -58,3 +67,41 @@ const result = failure.match(
 );
 
 console.log({ result });
+*/
+
+
+
+//функція для обчислення податку з доходу
+function calculateTax(income) {
+  if (typeof income !== 'number' || income <= 0) {
+    // Якщо ні то помилка (left)
+    return Either.left('Invalid income amount');
+  }
+
+  //якщо немає помилки (right)
+  return Either.right(income * taxRate);
+}
+
+
+//зчитування введення користувача
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+
+//логіка взаємодії з користувачем
+rl.question('Введіть ваш дохід: ', (input) => {
+  const income = Number(input);
+
+  //виклик функції розрахунку податку
+  calculateTax(income)
+  //знаки після коми при успіху (right)
+  .map((tax) => tax.toFixed(2))
+    .match(
+      (err) => console.log('Помилка:', err),    // якщо помилка (left)
+      (tax) => console.log('Податок становить:', tax + ' грн')  // якщо успіх (right)
+    );
+
+  rl.close();
+});
