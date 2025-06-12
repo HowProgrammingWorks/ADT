@@ -53,7 +53,6 @@ class Either {
 }
 
 // Usage
-
 /*
 const success = Either.right(42);
 const failure = Either.left(500);
@@ -73,13 +72,15 @@ console.log({ result });
 
 //функція для обчислення податку з доходу
 function calculateTax(income) {
-  if (typeof income !== 'number' || income <= 0) {
+  if (isNaN(income) || income <= 0) {
     // Якщо ні то помилка (left)
     return Either.left('Invalid income amount');
   }
 
+  const tax = income * taxRate;
+
   //якщо немає помилки (right)
-  return Either.right(income * taxRate);
+  return Either.right({ tax, rate: taxRate });
 }
 
 
@@ -97,10 +98,17 @@ rl.question('Введіть ваш дохід: ', (input) => {
   //виклик функції розрахунку податку
   calculateTax(income)
   //знаки після коми при успіху (right)
-  .map((tax) => tax.toFixed(2))
+    .map(({ tax, rate }) => ({
+      tax: tax.toFixed(2),
+      rate: (rate * 100).toFixed(0) + '%'
+    }))
+    //обробка результату
     .match(
-      (err) => console.log('Помилка:', err),    // якщо помилка (left)
-      (tax) => console.log('Податок становить:', tax + ' грн')  // якщо успіх (right)
+      (err) => console.log('Помилка:', err),
+      ({ tax, rate }) => {
+        console.log('Податок становить:', tax, 'при ставці', rate);
+        console.log('[LOG] Розрахунок виконано успішно.');
+      }
     );
 
   rl.close();
